@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  project1:
+    build:
+      context: ./p1
+      dockerfile: Dockerfile
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017/monitoring_db
+      - REDIS_HOST=redis
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    ports:
+      - "3000:3000" # در صورت نیاز
+
+  project2:
+    build:
+      context: ./p2
+      dockerfile: Dockerfile
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017/monitoring_db
+      - REDIS_HOST=redis
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    ports:
+      - "3001:3001" # در صورت نیاز
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5673:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-mongodb-datasource
